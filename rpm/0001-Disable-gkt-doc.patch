@@ -1,0 +1,67 @@
+From 4b07ee03b02ed60b9feef2586ff794ba858f7cd0 Mon Sep 17 00:00:00 2001
+From: Pekka Vuorela <pekka.vuorela@jolla.com>
+Date: Tue, 3 Sep 2019 18:21:29 +0300
+Subject: [PATCH] Disable gkt-doc
+
+---
+ Makefile.am  | 3 +--
+ autogen.sh   | 2 +-
+ configure.ac | 4 ----
+ 3 files changed, 2 insertions(+), 7 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 9cc6c9a5..66c6bb74 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,4 +1,4 @@
+-SUBDIRS = . gdk-pixbuf-loader tests tools doc build
++SUBDIRS = . gdk-pixbuf-loader tests tools build
+ 
+ NULL =
+ BUILT_SOURCES =
+@@ -163,7 +163,6 @@ EXTRA_DIST =				\
+ 	NEWS				\
+ 	COPYING.LIB 			\
+ 	librsvg-zip.in 			\
+-	gtk-doc.make			\
+ 	Rsvg-2.0-custom.vala		\
+ 	Rsvg-2.0.metadata		\
+ 	config.h.win32.in		\
+diff --git a/autogen.sh b/autogen.sh
+index 9a0985b2..b640119f 100755
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -23,7 +23,7 @@ if [ "$#" = 0 -a "x$NOCONFIGURE" = "x" ]; then
+ fi
+ 
+ aclocal --install || exit 1
+-gtkdocize --copy || exit 1
++# gtkdocize --copy || exit 1
+ autoreconf --verbose --force --install || exit 1
+ 
+ cd "$olddir"
+diff --git a/configure.ac b/configure.ac
+index e5a5aa5d..1ac26eef 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -207,8 +207,6 @@ AC_SUBST([BSYMBOLIC_LDFLAG])
+ # Checks for gtk-doc and docbook-tools
+ ##################################################
+ 
+-GTK_DOC_CHECK([1.13],[--flavour no-tmpl])
+-
+ AC_SUBST([GLIB_PREFIX],[$($PKG_CONFIG --variable=prefix glib-2.0)])
+ AC_SUBST([GDK_PIXBUF_PREFIX],[$($PKG_CONFIG --variable=prefix gdk-pixbuf-2.0)])
+ AC_SUBST([GTK_PREFIX],[$($PKG_CONFIG --variable=prefix gdk-pixbuf-2.0)])
+@@ -297,8 +295,6 @@ librsvg-zip
+ gdk-pixbuf-loader/Makefile
+ tests/Makefile
+ tools/Makefile
+-doc/Makefile
+-doc/version.xml
+ config.h.win32
+ build/Makefile
+ build/win32/Makefile
+-- 
+2.21.0
+

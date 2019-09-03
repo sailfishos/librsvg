@@ -1,0 +1,3 @@
+[submodule "librsvg"]
+	path = librsvg
+	url = https://git.merproject.org/mirror/librsvg.git
