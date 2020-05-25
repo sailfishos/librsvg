@@ -54,7 +54,8 @@ export enable_pixbuf_loader
         --disable-gtk-doc \
         --enable-introspection \
         --enable-vala \
-        --prefix=%{_prefix}
+        --prefix=%{_prefix} \
+        --libdir=%{_libdir}
 
 make %{?_smp_mflags}
 
