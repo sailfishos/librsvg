@@ -1,0 +1,64 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matti Viljanen <matti.viljanen@jolla.com>
+Date: Mon, 27 Jan 2025 20:34:19 +0200
+Subject: [PATCH] Fixes for Rust 1.75
+
+---
+ Cargo.toml              | 2 +-
+ ci/container_builds.yml | 2 +-
+ ci/test-msvc.bat        | 2 +-
+ meson.build             | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 981e9910d..04b8efff9 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -12,7 +12,7 @@ repository = "https://gitlab.gnome.org/GNOME/librsvg/"
+ categories = ["graphics", "multimedia::images", "rendering::data-formats"]
+ keywords = ["svg", "cairo"]
+ edition = "2021"
+-rust-version = "1.77.2"
++rust-version = "1.75.0"
+ 
+ [profile.overflow]
+ inherits = "release"
+diff --git a/ci/container_builds.yml b/ci/container_builds.yml
+index c8c576601..61105bf7d 100644
+--- a/ci/container_builds.yml
++++ b/ci/container_builds.yml
+@@ -8,7 +8,7 @@ include:
+ variables:
+   BASE_TAG: "2024-10-20.0-main"
+   RUST_STABLE: "1.81.0"
+-  RUST_MINIMUM: "1.77.2"
++  RUST_MINIMUM: "1.75.0"
+   RUST_NIGHTLY: "nightly-2024-07-14"
+   RUSTUP_VERSION: "1.26.0"
+   GNOMEOS_STABLE: "core-47"
+diff --git a/ci/test-msvc.bat b/ci/test-msvc.bat
+index 97912741a..a735efe48 100644
+--- a/ci/test-msvc.bat
++++ b/ci/test-msvc.bat
+@@ -108,7 +108,7 @@ cd msvc-build
+ if exist %INST%\lib\libpcre2-8.a copy /b %INST%\lib\libpcre2-8.a %INST%\lib\pcre2-8.lib
+ 
+ if not "%DOWNGRADE_RUST_VERSION%" == "1" goto :normal_rust_build
+-@set RUST_DOWNGRADE_VER=1.77.2
++@set RUST_DOWNGRADE_VER=1.75.0
+ %HOMEPATH%\.cargo\bin\rustup install %RUST_DOWNGRADE_VER%-%RUST_HOST%
+ meson setup .. --buildtype=release --prefix=%INST_PSX% --pkg-config-path=%INST%\lib\pkgconfig --cmake-prefix-path=%INST% -Dtriplet=%RUST_HOST% -Drustc-version=%RUST_DOWNGRADE_VER% || goto :error
+ goto :continue_build
+diff --git a/meson.build b/meson.build
+index 12cb44fa3..b977bc4b3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -23,7 +23,7 @@ cc = meson.get_compiler('c')
+ #   - the "rust-version" value in Cargo.toml
+ #   - the "_manual_setup" section of devel-docs/devel_environment.rst
+ #   - the "RUST_MINIMUM" variable in ci/container_builds.yml
+-msrv = '1.77.2'
++msrv = '1.75.0'
+ cargo = find_program('cargo', version:'>= @0@'.format(msrv))
+ cargo_wrapper = find_program('meson/cargo_wrapper.py', native: true)
+ cargo_c = find_program('cargo-cbuild', version:'>= 0.9.19') # https://github.com/lu-zero/cargo-c

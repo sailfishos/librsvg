@@ -1,0 +1,147 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matti Viljanen <matti.viljanen@jolla.com>
+Date: Tue, 1 Apr 2025 11:21:54 +0300
+Subject: [PATCH] Revert "rsvg-c: Use C-string literals when possible"
+
+This reverts commit 0e68f6fe870b9d383805f9bd79eaed766803f0ef.
+
+sfos: Revert Rust 1.77 requirement to Rust 1.75
+---
+ librsvg-c/src/handle.rs   | 20 ++++++++++----------
+ librsvg-c/src/messages.rs | 14 +++++++-------
+ 2 files changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/librsvg-c/src/handle.rs b/librsvg-c/src/handle.rs
+index b7a0e50a4..9587af2d3 100644
+--- a/librsvg-c/src/handle.rs
++++ b/librsvg-c/src/handle.rs
+@@ -2089,12 +2089,12 @@ mod tests {
+     #[test]
+     fn path_or_url_unix() {
+         unsafe {
+-            match PathOrUrl::new(c"/foo/bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("/foo/bar")).unwrap() {
+                 PathOrUrl::Path(_) => (),
+                 _ => panic!("unix filename should be a PathOrUrl::Path"),
+             }
+ 
+-            match PathOrUrl::new(c"foo/bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("foo/bar")).unwrap() {
+                 PathOrUrl::Path(_) => (),
+                 _ => panic!("unix filename should be a PathOrUrl::Path"),
+             }
+@@ -2104,22 +2104,22 @@ mod tests {
+     #[test]
+     fn path_or_url_windows() {
+         unsafe {
+-            match PathOrUrl::new(c"c:/foo/bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("c:/foo/bar")).unwrap() {
+                 PathOrUrl::Path(_) => (),
+                 _ => panic!("windows filename should be a PathOrUrl::Path"),
+             }
+ 
+-            match PathOrUrl::new(c"C:/foo/bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("C:/foo/bar")).unwrap() {
+                 PathOrUrl::Path(_) => (),
+                 _ => panic!("windows filename should be a PathOrUrl::Path"),
+             }
+ 
+-            match PathOrUrl::new(c"c:\\foo\\bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("c:\\foo\\bar")).unwrap() {
+                 PathOrUrl::Path(_) => (),
+                 _ => panic!("windows filename should be a PathOrUrl::Path"),
+             }
+ 
+-            match PathOrUrl::new(c"C:\\foo\\bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("C:\\foo\\bar")).unwrap() {
+                 PathOrUrl::Path(_) => (),
+                 _ => panic!("windows filename should be a PathOrUrl::Path"),
+             }
+@@ -2129,7 +2129,7 @@ mod tests {
+     #[test]
+     fn path_or_url_unix_url() {
+         unsafe {
+-            match PathOrUrl::new(c"file:///foo/bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("file:///foo/bar")).unwrap() {
+                 PathOrUrl::Url(_) => (),
+                 _ => panic!("file:// unix filename should be a PathOrUrl::Url"),
+             }
+@@ -2139,12 +2139,12 @@ mod tests {
+     #[test]
+     fn path_or_url_windows_url() {
+         unsafe {
+-            match PathOrUrl::new(c"file://c:/foo/bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("file://c:/foo/bar")).unwrap() {
+                 PathOrUrl::Url(_) => (),
+                 _ => panic!("file:// windows filename should be a PathOrUrl::Url"),
+             }
+ 
+-            match PathOrUrl::new(c"file://C:/foo/bar".as_ptr()).unwrap() {
++            match PathOrUrl::new(rsvg_c_str!("file://C:/foo/bar")).unwrap() {
+                 PathOrUrl::Url(_) => (),
+                 _ => panic!("file:// windows filename should be a PathOrUrl::Url"),
+             }
+@@ -2154,7 +2154,7 @@ mod tests {
+     #[test]
+     fn path_or_url_empty_str() {
+         unsafe {
+-            assert!(PathOrUrl::new(c"".as_ptr()).is_err());
++            assert!(PathOrUrl::new(rsvg_c_str!("")).is_err());
+         }
+ 
+         assert!(PathOrUrl::from_os_str(OsStr::new("")).is_err());
+diff --git a/librsvg-c/src/messages.rs b/librsvg-c/src/messages.rs
+index 9c1ced487..7c6336ee5 100644
+--- a/librsvg-c/src/messages.rs
++++ b/librsvg-c/src/messages.rs
+@@ -56,7 +56,7 @@ macro_rules! rsvg_c_str {
+ fn rsvg_g_log(level: glib::ffi::GLogLevelFlags, msg: &str) {
+     // stolen from gmessages.c:log_level_to_priority()
+     let priority = match level {
+-        G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL => c"4".as_ptr(),
++        G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL => rsvg_c_str!("4"),
+         _ => unreachable!("please add another log level priority to rsvg_g_log()"),
+     };
+ 
+@@ -68,19 +68,19 @@ fn rsvg_g_log(level: glib::ffi::GLogLevelFlags, msg: &str) {
+     // trace.  So, we'll omit them.
+     let fields = [
+         GLogField {
+-            key: c"PRIORITY".as_ptr(),
++            key: rsvg_c_str!("PRIORITY"),
+             value: priority.cast(),
+             length: -1,
+         },
+         GLogField {
+-            key: c"MESSAGE".as_ptr(),
++            key: rsvg_c_str!("MESSAGE"),
+             value: c_char_msg.cast(),
+             length: msg.len() as _,
+         },
+         // This is the G_LOG_DOMAIN set from the Makefile
+         GLogField {
+-            key: c"GLIB_DOMAIN".as_ptr(),
+-            value: c"librsvg".as_ptr().cast(),
++            key: rsvg_c_str!("GLIB_DOMAIN"),
++            value: rsvg_c_str!("librsvg").cast(),
+             length: -1,
+         },
+     ];
+@@ -127,7 +127,7 @@ macro_rules! rsvg_return_if_fail {
+         $(
+             if !$condition {
+                 glib::ffi::g_return_if_fail_warning(
+-                    c"librsvg".as_ptr(),
++                    rsvg_c_str!("librsvg"),
+                     rsvg_c_str!(stringify!($func_name)),
+                     rsvg_c_str!(stringify!($condition)),
+                 );
+@@ -147,7 +147,7 @@ macro_rules! rsvg_return_val_if_fail {
+         $(
+             if !$condition {
+                 glib::ffi::g_return_if_fail_warning(
+-                    c"librsvg".as_ptr(),
++                    rsvg_c_str!("librsvg"),
+                     rsvg_c_str!(stringify!($func_name)),
+                     rsvg_c_str!(stringify!($condition)),
+                 );
